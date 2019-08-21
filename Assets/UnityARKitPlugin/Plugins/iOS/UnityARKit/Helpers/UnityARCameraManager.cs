@@ -34,6 +34,7 @@ public class UnityARCameraManager : MonoBehaviour {
         config.getPointCloudData = false;
         config.enableLightEstimation = false;
         m_session.RunWithConfig (config);
+        DestroyAllPlanes();
     }
     
     public void DestroyAllPlanes()
