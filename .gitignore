@@ -34,3 +34,7 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+.idea/.idea.AVRCutMeshTest/.idea/indexLayout.xml
+.idea/.idea.AVRCutMeshTest/.idea/misc.xml
+.idea/.idea.AVRCutMeshTest/.idea/modules.xml
+.idea/.idea.AVRCutMeshTest/.idea/vcs.xml
