@@ -22,9 +22,10 @@ public class GameController : MonoBehaviour
    private void ImplementCut(Plane cutPlane)
    {
       List<RawMeshData> res = new List<RawMeshData>();
-      for(int i = _objectsOnScene.Count-1; i > 0 ; i--)
+      for(int i = _objectsOnScene.Count-1; i >= 0 ; i--)
       {
          res = MeshSlicer.SliceMesh(cutPlane, _objectsOnScene[i]);
+
          if (res.Count > 0)
          {
             Destroy(_objectsOnScene[i].gameObject);

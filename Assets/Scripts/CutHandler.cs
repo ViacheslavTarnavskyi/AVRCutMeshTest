@@ -35,13 +35,10 @@ public class CutHandler : MonoBehaviour
     
     private void OnTouchUp(Gesture gesture)
     {
-        Debug.LogError("cut");
-
         _touchUp = gesture.GetTouchToWorldPoint((Vector3)gesture.position+Vector3.forward);
 
         float magnitude = (_touchStart - _touchUp).magnitude;
         if(magnitude <  _swipeThreshold) return;
-        
         Plane cutPlane = new Plane(_touchStart,_touchUp,_cutcamera.transform.position);
 
         if (OnCutPlaneCreate != null)

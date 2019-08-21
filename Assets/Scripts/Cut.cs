@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Cut
@@ -27,7 +28,6 @@ public class Cut
    {
       List<Vector3> cutEdge = new List<Vector3>();
       List<Triangle> originalTriangles = _originalMesh.GetMeshTriangles();
-      
       foreach (var triangle in originalTriangles)
       {
          if (triangle.Belongs(_posSubMesh))
@@ -45,8 +45,8 @@ public class Cut
          }
       }
       
-      AddCap(_posSubMesh,cutEdge);
-      AddInvevrsedCap(_negSubMesh,cutEdge);
+      AddCap(_negSubMesh,cutEdge);
+      AddInvevrsedCap(_posSubMesh,cutEdge);
       
       meshes.Add(_posSubMesh);
       meshes.Add(_negSubMesh);
@@ -59,12 +59,13 @@ public class Cut
       int VertsCount = data.Verts.Count;
       data.Verts.AddRange(edge);
 
-      for (int i = VertsCount; i < data.Verts.Count - 2; i++)
+      for (int i = VertsCount; i < data.Verts.Count - 2; i+=2)
       {
          data.Tris.AddLast(new Triangle(i, i + 1, data.Verts.Count - 1));
       }
-      data.Tris.AddLast(new Triangle(data.Verts.Count - 2, VertsCount, data.Verts.Count - 1));
    }
+   
+   
    private void AddInvevrsedCap(RawMeshData data,List<Vector3> edge)
    {
       Vector3 capCenter = Utils.ComputeCenter(edge);
@@ -72,11 +73,10 @@ public class Cut
       int VertsCount = data.Verts.Count;
       data.Verts.AddRange(edge);
 
-      for (int i = data.Verts.Count - 2; i >= VertsCount ; i++)
+      for (int i = VertsCount; i < data.Verts.Count - 2; i+=2)
       {
-         data.Tris.AddLast(new Triangle(i, data.Verts.Count - 1,i - 1));
+         data.Tris.AddLast(new Triangle(i+1, i, data.Verts.Count - 1));
       }
-      data.Tris.AddLast(new Triangle(VertsCount, data.Verts.Count - 1,data.Verts.Count - 2 ));
    }
    
    private void CopyMeshValuesByTri(Triangle triangle, RawMeshData data)
@@ -91,7 +91,7 @@ public class Cut
 
       triangle.DetectTriangleOriginSide(_posSubMesh, _negSubMesh, out RawMeshData originSide, out RawMeshData alienSide);
       TriangleCutTypeOrigin cutType = triangle.DetectTriangleCutType(originSide);
-
+      
       //different cut logic due to a triangle points location
       switch (cutType)
       {
@@ -166,9 +166,17 @@ public class Cut
          alienSide.Verts.Count - 1)
       );
 
-      //adding intersections as edge points
-      cutEdge.Add(intersection2);
-      cutEdge.Add(intersection1);
+      //adding intersections as edge points dependent on origin side
+      if (originSide.Equals(_posSubMesh))
+      {
+         cutEdge.Add(intersection1);
+         cutEdge.Add(intersection2);
+      }
+      else
+      {
+         cutEdge.Add(intersection2);
+         cutEdge.Add(intersection1);
+      }
 
       return cutEdge;
    }
@@ -195,14 +203,8 @@ public class Cut
       //adding new vertices on one side of the plane
       originSide.Verts.AddLast(p0Val);
       originSide.Verts.AddLast(p1Val);
-      originSide.Verts.AddLast(intersection1);
       originSide.Verts.AddLast(intersection2);
-
-      //adding uv,normals,colors to the origin sub mesh
-      originSide.CopyMeshParams(triangle.P0);
-      originSide.CopyMeshParams(triangle.P1);
-      originSide.CopyMeshParams(triangle.P1);
-      originSide.CopyMeshParams(triangle.P1);
+      originSide.Verts.AddLast(intersection1);
             
       //generating triangles on these vertices
       originSide.Tris.AddLast(new Triangle(
@@ -217,8 +219,8 @@ public class Cut
       );
 
       //adding new vertices on one other of the plane
-      alienSide.Verts.AddLast(intersection2);
       alienSide.Verts.AddLast(intersection1);
+      alienSide.Verts.AddLast(intersection2);
       alienSide.Verts.AddLast(p2Val);
 
       //generating triangles on these vertices
@@ -228,10 +230,17 @@ public class Cut
          alienSide.Verts.Count - 1)
       );
 
-      //adding intersections as edge points
-      cutEdge.Add(intersection2);
-      cutEdge.Add(intersection1);
-      
+      //adding intersections as edge points dependent on origin side
+      if (originSide.Equals(_posSubMesh))
+      {
+         cutEdge.Add(intersection2);
+         cutEdge.Add(intersection1);
+      }
+      else
+      {
+         cutEdge.Add(intersection1);
+         cutEdge.Add(intersection2);
+      }
       return cutEdge;
    }
 
@@ -284,10 +293,17 @@ public class Cut
          alienSide.Verts.Count - 1)
       );
 
-      //adding intersections as edge points
-      cutEdge.Add(intersection2);
-      cutEdge.Add(intersection1);
-      
+      //adding intersections as edge points dependent on origin side
+      if (originSide.Equals(_posSubMesh))
+      {
+         cutEdge.Add(intersection1);
+         cutEdge.Add(intersection2);
+      }
+      else
+      {
+         cutEdge.Add(intersection2);
+         cutEdge.Add(intersection1);
+      }
       return cutEdge;
    }
 }

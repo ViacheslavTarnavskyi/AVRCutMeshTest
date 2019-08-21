@@ -2,9 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class SlicedObject : MonoBehaviour
 {
+    private const float cutForce = 80;
+    
     [SerializeField]private MeshRenderer _renderer;
     [SerializeField]private MeshFilter _filter;
     [SerializeField]private MeshCollider _collider;
@@ -23,6 +26,7 @@ public class SlicedObject : MonoBehaviour
         mesh.RecalculateTangents();
         Filter.mesh = mesh;
         _collider.sharedMesh = mesh;
-        _rigidBody.isKinematic = false;
+       _rigidBody.isKinematic = false;
+       _rigidBody.AddForce(new Vector3(Random.Range(0,cutForce),Random.Range(0,cutForce),Random.Range(0,cutForce)));
     }
 }
