@@ -6,7 +6,8 @@ using Random = UnityEngine.Random;
 
 public class SlicedObject : MonoBehaviour
 {
-    private const float cutForce = 80;
+    private const float CUT_FORCE = 30;
+    private const float DRAG = 5;
     
     [SerializeField]private MeshRenderer _renderer;
     [SerializeField]private MeshFilter _filter;
@@ -18,6 +19,7 @@ public class SlicedObject : MonoBehaviour
 
     public void Init(Transform prototype, Mesh mesh)
     {
+        Random.InitState(System.DateTime.Now.Millisecond);
         var transformCashed = transform;
         transformCashed.position = prototype.position;
         transformCashed.rotation = prototype.rotation;
@@ -27,6 +29,8 @@ public class SlicedObject : MonoBehaviour
         Filter.mesh = mesh;
         _collider.sharedMesh = mesh;
        _rigidBody.isKinematic = false;
-       _rigidBody.AddForce(new Vector3(Random.Range(0,cutForce),Random.Range(0,cutForce),Random.Range(0,cutForce)));
+       _rigidBody.drag = DRAG;
+       _rigidBody.AddForce( Vector3.one.Random(CUT_FORCE));
+       _rigidBody.AddTorque(Vector3.one.Random(CUT_FORCE));
     }
 }

@@ -6,9 +6,12 @@ using UnityEngine;
 public class GameController : MonoBehaviour
 {
    [SerializeField] private GameObject _slicePrefab;
-   
-   private List<SlicedObject> _objectsOnScene = new List<SlicedObject>();
+   [SerializeField] private Transform _spawnPosition;
+   [SerializeField] private AudioSource _swipeEffectSource;
+   [SerializeField] private AudioSource _cutEffectSource;
 
+   private List<SlicedObject> _objectsOnScene = new List<SlicedObject>();
+   
    private void OnEnable()
    {
       CutHandler.OnCutPlaneCreate += ImplementCut;
@@ -21,6 +24,7 @@ public class GameController : MonoBehaviour
 
    private void ImplementCut(Plane cutPlane)
    {
+      SwipeEffect();
       List<RawMeshData> res = new List<RawMeshData>();
       for(int i = _objectsOnScene.Count-1; i >= 0 ; i--)
       {
@@ -30,6 +34,7 @@ public class GameController : MonoBehaviour
          {
             Destroy(_objectsOnScene[i].gameObject);
             _objectsOnScene.RemoveAt(i);
+            CutEffect();
          }
          foreach (var slice in res)
          {
@@ -40,13 +45,25 @@ public class GameController : MonoBehaviour
 
    private void InstantiateSlice(RawMeshData data)
    {
-      SlicedObject slice = Instantiate(_slicePrefab).GetComponent<SlicedObject>();
+      SlicedObject slice = Instantiate(_slicePrefab,transform).GetComponent<SlicedObject>();
       slice.Init(data.MeshTransform,data.ToMesh());
       _objectsOnScene.Add(slice);
    }
 
    public void SpawnAPrimitive()
    {
-      _objectsOnScene.Add(Instantiate(_slicePrefab).GetComponent<SlicedObject>());
+      SlicedObject newSlice = Instantiate(_slicePrefab).GetComponent<SlicedObject>();
+      newSlice.transform.position = _spawnPosition.position;
+      _objectsOnScene.Add(newSlice);
+   }
+
+   private void SwipeEffect()
+   {
+      _swipeEffectSource.Play();
+   }
+
+   private void CutEffect()
+   {
+      _cutEffectSource.Play();
    }
 }

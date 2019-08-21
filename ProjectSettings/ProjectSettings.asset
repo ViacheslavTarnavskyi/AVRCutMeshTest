@@ -12,7 +12,7 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: DefaultCompany
+  companyName: AVRSpot
   productName: AVR_Spot_test
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
@@ -56,9 +56,9 @@ PlayerSettings:
   displayResolutionDialog: 0
   iosAllowHTTPDownload: 1
   allowedAutorotateToPortrait: 1
-  allowedAutorotateToPortraitUpsideDown: 1
-  allowedAutorotateToLandscapeRight: 1
-  allowedAutorotateToLandscapeLeft: 1
+  allowedAutorotateToPortraitUpsideDown: 0
+  allowedAutorotateToLandscapeRight: 0
+  allowedAutorotateToLandscapeLeft: 0
   useOSAutorotation: 1
   use32BitDisplayBuffer: 1
   preserveFramebufferAlpha: 0
@@ -159,7 +159,8 @@ PlayerSettings:
   resolutionScalingMode: 0
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
-  applicationIdentifier: {}
+  applicationIdentifier:
+    iPhone: com.AVRSpot.AVRSpotTest
   buildNumber: {}
   AndroidBundleVersionCode: 1
   AndroidMinSdkVersion: 16
@@ -177,7 +178,7 @@ PlayerSettings:
   StripUnusedMeshComponents: 1
   VertexChannelCompressionMask: 4054
   iPhoneSdkVersion: 988
-  iOSTargetOSVersionString: 9.0
+  iOSTargetOSVersionString: 11.0
   tvOSSdkVersion: 0
   tvOSRequireExtendedGameController: 0
   tvOSTargetOSVersionString: 9.0
