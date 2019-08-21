@@ -8,7 +8,6 @@ public class GameController : MonoBehaviour
    [SerializeField] private GameObject _slicePrefab;
    [SerializeField] private Transform _spawnPosition;
    [SerializeField] private AudioSource _swipeEffectSource;
-   [SerializeField] private AudioSource _cutEffectSource;
 
    private List<SlicedObject> _objectsOnScene = new List<SlicedObject>();
    
@@ -29,12 +28,10 @@ public class GameController : MonoBehaviour
       for(int i = _objectsOnScene.Count-1; i >= 0 ; i--)
       {
          res = MeshSlicer.SliceMesh(cutPlane, _objectsOnScene[i]);
-
          if (res.Count > 0)
          {
             Destroy(_objectsOnScene[i].gameObject);
             _objectsOnScene.RemoveAt(i);
-            CutEffect();
          }
          foreach (var slice in res)
          {
@@ -60,10 +57,5 @@ public class GameController : MonoBehaviour
    private void SwipeEffect()
    {
       _swipeEffectSource.Play();
-   }
-
-   private void CutEffect()
-   {
-      _cutEffectSource.Play();
    }
 }

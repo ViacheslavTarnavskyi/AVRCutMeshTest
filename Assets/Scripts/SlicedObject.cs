@@ -6,8 +6,8 @@ using Random = UnityEngine.Random;
 
 public class SlicedObject : MonoBehaviour
 {
-    private const float CUT_FORCE = 30;
-    private const float DRAG = 5;
+    private const float CUT_FORCE = 40;
+    private const float DRAG = 6;
     
     [SerializeField]private MeshRenderer _renderer;
     [SerializeField]private MeshFilter _filter;
