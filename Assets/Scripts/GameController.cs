@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
@@ -21,6 +22,10 @@ public class GameController : MonoBehaviour
       CutHandler.OnCutPlaneCreate -= ImplementCut;
    }
 
+   /// <summary>
+   /// Defines which meshes must be cut
+   /// </summary>
+   /// <param name="cutPlane"></param>
    private void ImplementCut(Plane cutPlane)
    {
       SwipeEffect();
@@ -40,6 +45,10 @@ public class GameController : MonoBehaviour
       }
    }
 
+   /// <summary>
+   /// Instantiates a new cut slice
+   /// </summary>
+   /// <param name="data"></param>
    private void InstantiateSlice(RawMeshData data)
    {
       SlicedObject slice = Instantiate(_slicePrefab,transform).GetComponent<SlicedObject>();
@@ -47,13 +56,31 @@ public class GameController : MonoBehaviour
       _objectsOnScene.Add(slice);
    }
 
+   /// <summary>
+   /// Spawn a primitive in front of the camera
+   /// </summary>
    public void SpawnAPrimitive()
    {
       SlicedObject newSlice = Instantiate(_slicePrefab).GetComponent<SlicedObject>();
       newSlice.transform.position = _spawnPosition.position;
       _objectsOnScene.Add(newSlice);
    }
+   
+   /// <summary>
+   /// Clears the field
+   /// </summary>
+   public void ClearField()
+   {
+      for (int i = _objectsOnScene.Count - 1; i >= 0; i--)
+      {
+         Destroy(_objectsOnScene[i].gameObject);
+      }
+      _objectsOnScene.Clear();
+   }
 
+   /// <summary>
+   /// Swipe sound effect
+   /// </summary>
    private void SwipeEffect()
    {
       _swipeEffectSource.Play();

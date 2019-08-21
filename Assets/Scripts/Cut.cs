@@ -13,7 +13,14 @@ public class Cut
    private Plane _cutterPlane;
 
    public List<RawMeshData> meshes = new List<RawMeshData>();
-
+   
+   /// <summary>
+   /// Constructor
+   /// </summary>
+   /// <param name="originalMesh"></param>
+   /// <param name="posSubMesh"></param>
+   /// <param name="negSubMesh"></param>
+   /// <param name="cutterPlane"></param>
    public Cut(Mesh originalMesh, RawMeshData posSubMesh, RawMeshData negSubMesh, Plane cutterPlane)
    {
       _originalMesh = originalMesh;
@@ -24,6 +31,9 @@ public class Cut
       CutMesh();
    }
 
+   /// <summary>
+   /// Cut algorithm
+   /// </summary>
    private void CutMesh()
    {
       List<Vector3> cutEdge = new List<Vector3>();
@@ -52,6 +62,11 @@ public class Cut
       meshes.Add(_negSubMesh);
    }
 
+   /// <summary>
+   /// Ads a cap for the hull data
+   /// </summary>
+   /// <param name="data"></param>
+   /// <param name="edge"></param>
    private void AddCap(RawMeshData data,List<Vector3> edge)
    {
       Vector3 capCenter = Utils.ComputeCenter(edge);
@@ -65,7 +80,11 @@ public class Cut
       }
    }
    
-   
+   /// <summary>
+   /// Ads inversed cap for  a hull data
+   /// </summary>
+   /// <param name="data"></param>
+   /// <param name="edge"></param>
    private void AddInvevrsedCap(RawMeshData data,List<Vector3> edge)
    {
       Vector3 capCenter = Utils.ComputeCenter(edge);
@@ -79,12 +98,22 @@ public class Cut
       }
    }
    
+   /// <summary>
+   /// Copies data from its prototype by a triangle
+   /// </summary>
+   /// <param name="triangle"></param>
+   /// <param name="data"></param>
    private void CopyMeshValuesByTri(Triangle triangle, RawMeshData data)
    {
       data.Verts.AddRange(data.Prototype.GetVerts(triangle));
       data.Tris.AddLast(new Triangle(data.Verts.Count - 3, data.Verts.Count - 2, data.Verts.Count - 1));
    }
 
+   /// <summary>
+   /// Cuts a triangle
+   /// </summary>
+   /// <param name="triangle"></param>
+   /// <param name="cutEdge"></param>
    private void CutTriangle(Triangle triangle, out List<Vector3> cutEdge)
    {
       cutEdge = new List<Vector3>();
@@ -107,6 +136,13 @@ public class Cut
       }
    }
 
+   /// <summary>
+   /// Computes a line/plane intersection point
+   /// </summary>
+   /// <param name="plane"></param>
+   /// <param name="l1"></param>
+   /// <param name="l2"></param>
+   /// <returns></returns>
    private Vector3 PlaneLineIntersection(Plane plane, Vector3 l1, Vector3 l2)
    {
       Ray ray = new Ray();
@@ -116,6 +152,13 @@ public class Cut
       return ray.GetPoint(enter);
    }
 
+   /// <summary>
+   /// Triangle Cut logic for triangle (0)(1,2)
+   /// </summary>
+   /// <param name="triangle"></param>
+   /// <param name="originSide"></param>
+   /// <param name="alienSide"></param>
+   /// <returns></returns>
    private List<Vector3> CreateP0Cut(Triangle triangle, RawMeshData originSide, RawMeshData alienSide)
    {
       Transform transform = originSide.MeshTransform;
@@ -148,7 +191,7 @@ public class Cut
          originSide.Verts.Count - 1)
       );
             
-      //adding new vertices on one other of the plane
+      //adding new vertices on other side of the plane
       alienSide.Verts.AddLast(intersection2);
       alienSide.Verts.AddLast(intersection1);
       alienSide.Verts.AddLast(p1Val);
@@ -181,6 +224,13 @@ public class Cut
       return cutEdge;
    }
 
+   /// <summary>
+   /// Triangle Cut logic for triangle (0,1)(2)
+   /// </summary>
+   /// <param name="triangle"></param>
+   /// <param name="originSide"></param>
+   /// <param name="alienSide"></param>
+   /// <returns></returns>
    private List<Vector3> CreateP01Cut(Triangle triangle, RawMeshData originSide, RawMeshData alienSide)
    {
       Transform transform = originSide.MeshTransform;
@@ -218,7 +268,7 @@ public class Cut
          originSide.Verts.Count - 1)
       );
 
-      //adding new vertices on one other of the plane
+      //adding new vertices on other side of the plane
       alienSide.Verts.AddLast(intersection1);
       alienSide.Verts.AddLast(intersection2);
       alienSide.Verts.AddLast(p2Val);
@@ -244,6 +294,13 @@ public class Cut
       return cutEdge;
    }
 
+   /// <summary>
+   /// Triangle Cut logic for triangle (2,0)(1) 
+   /// </summary>
+   /// <param name="triangle"></param>
+   /// <param name="originSide"></param>
+   /// <param name="alienSide"></param>
+   /// <returns></returns>
    private List<Vector3> CreateP20Cut(Triangle triangle, RawMeshData originSide, RawMeshData alienSide)
    {
       Transform transform = originSide.MeshTransform;
@@ -281,7 +338,7 @@ public class Cut
          originSide.Verts.Count - 1)
       );
 
-      //adding new vertices on one other of the plane
+      //adding new vertices on other side of the plane
       alienSide.Verts.AddLast(intersection2);
       alienSide.Verts.AddLast(intersection1);
       alienSide.Verts.AddLast(p1Val);

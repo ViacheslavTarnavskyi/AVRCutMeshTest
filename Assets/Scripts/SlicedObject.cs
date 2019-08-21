@@ -17,6 +17,11 @@ public class SlicedObject : MonoBehaviour
     public MeshRenderer Graphics => _renderer;
     public MeshFilter Filter => _filter;
 
+    /// <summary>
+    /// Inits A new sliced object by mesh in transform
+    /// </summary>
+    /// <param name="prototype"></param>
+    /// <param name="mesh"></param>
     public void Init(Transform prototype, Mesh mesh)
     {
         Random.InitState(System.DateTime.Now.Millisecond);

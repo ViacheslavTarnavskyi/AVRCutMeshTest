@@ -4,6 +4,12 @@ using UnityEngine;
 
 public static class MeshSlicer
 {
+   /// <summary>
+   /// Slices a object into smaller parts
+   /// </summary>
+   /// <param name="cutterPlane"></param>
+   /// <param name="obj"></param>
+   /// <returns></returns>
    public static List<RawMeshData> SliceMesh(Plane cutterPlane, SlicedObject obj)
    {
       if (!IsMeshIntersectedByPlane(cutterPlane, obj.Filter.mesh, obj.Graphics.transform, out RawMeshData positive, out RawMeshData negative))
@@ -16,6 +22,15 @@ public static class MeshSlicer
       return cut.meshes;
    }
 
+   /// <summary>
+   /// Tels wheather a mesh is intersected by a plane
+   /// </summary>
+   /// <param name="cutterPlane"></param>
+   /// <param name="mesh"></param>
+   /// <param name="transform"></param>
+   /// <param name="pos"></param>
+   /// <param name="neg"></param>
+   /// <returns>true if does</returns>
    private static bool IsMeshIntersectedByPlane( Plane cutterPlane, Mesh mesh, Transform transform ,out RawMeshData pos, out RawMeshData neg)
    {
       pos = new RawMeshData(mesh,transform);
@@ -41,6 +56,15 @@ public static class MeshSlicer
       }
    }
    
+   /// <summary>
+   /// Divides vertices into two parts
+   /// </summary>
+   /// <param name="mesh"></param>
+   /// <param name="cutterPlane"></param>
+   /// <param name="meshTransform"></param>
+   /// <param name="verts"></param>
+   /// <param name="pos"></param>
+   /// <param name="neg"></param>
    private static void DivideVerticesToPosAndNegSubmeshes(Mesh mesh, Plane cutterPlane,Transform meshTransform, Vector3[] verts, out RawMeshData pos, out RawMeshData neg)
    {
       pos = new RawMeshData(mesh, meshTransform);

@@ -32,27 +32,15 @@ public class RawMeshData
         MeshTransform = meshTransform;
     }
 
-    public void CopyMeshParams(int index)
-    {
-       // Normals.AddLast(Prototype.normals[index]);
-       // Uvs.AddLast(Prototype.uv[index]);
-      //  Colors.AddLast(Prototype.colors[index]);
-    }
-
-    public void AddMeshParams(Vector3 normal,Vector2 uv,Color color)
-    {
-        Normals.AddLast(normal);
-        Uvs.AddLast(uv);
-        Colors.AddLast(color);
-    }
-
+    /// <summary>
+    /// Converrts RawMeshData into a Mesh object
+    /// </summary>
+    /// <returns></returns>
     public Mesh ToMesh()
     {
         Mesh res = new Mesh();
         res.vertices = Verts.ToArray();
         res.triangles = Utils.ToTris(Tris);
-        //res.uv = Uvs.ToArray();
-//        res.colors = Colors.ToArray();
         res.RecalculateNormals();
         return res;
     }
