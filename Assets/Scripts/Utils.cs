@@ -18,7 +18,7 @@ public static class Utils
     
     public static bool Belongs(this Triangle triangle, RawMeshData data)
     {
-        return data.VertsIndexes.Contains(triangle.P0) && data.VertsIndexes.Contains(triangle.P0) && data.VertsIndexes.Contains(triangle.P0);
+        return data.VertsIndexes.Contains(triangle.P0) && data.VertsIndexes.Contains(triangle.P1) && data.VertsIndexes.Contains(triangle.P2);
     }
     
     public static List<Vector3> GetVerts(this Mesh mesh, Triangle triangle)

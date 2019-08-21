@@ -45,45 +45,44 @@ public class Cut
          }
       }
       
-      AddCap(_posSubMesh,cutEdge,_cutterPlane.normal);
-      AddCap(_negSubMesh,cutEdge, _cutterPlane.normal * -1);
+      AddCap(_posSubMesh,cutEdge);
+      AddInvevrsedCap(_negSubMesh,cutEdge);
       
       meshes.Add(_posSubMesh);
       meshes.Add(_negSubMesh);
    }
 
-   private void AddCap(RawMeshData data,List<Vector3> edge, Vector3 normal)
+   private void AddCap(RawMeshData data,List<Vector3> edge)
    {
       Vector3 capCenter = Utils.ComputeCenter(edge);
       edge.Add(capCenter);
       int VertsCount = data.Verts.Count;
       data.Verts.AddRange(edge);
-      
-      for (int i = 0; i < VertsCount-1; i++)
-      {
-         data.AddMeshParams(normal,Vector2.zero,Color.white);
-      }
-      
+
       for (int i = VertsCount; i < data.Verts.Count - 2; i++)
       {
          data.Tris.AddLast(new Triangle(i, i + 1, data.Verts.Count - 1));
       }
       data.Tris.AddLast(new Triangle(data.Verts.Count - 2, VertsCount, data.Verts.Count - 1));
    }
+   private void AddInvevrsedCap(RawMeshData data,List<Vector3> edge)
+   {
+      Vector3 capCenter = Utils.ComputeCenter(edge);
+      edge.Add(capCenter);
+      int VertsCount = data.Verts.Count;
+      data.Verts.AddRange(edge);
+
+      for (int i = data.Verts.Count - 2; i >= VertsCount ; i++)
+      {
+         data.Tris.AddLast(new Triangle(i, data.Verts.Count - 1,i - 1));
+      }
+      data.Tris.AddLast(new Triangle(VertsCount, data.Verts.Count - 1,data.Verts.Count - 2 ));
+   }
    
    private void CopyMeshValuesByTri(Triangle triangle, RawMeshData data)
    {
       data.Verts.AddRange(data.Prototype.GetVerts(triangle));
-
-      data.Normals.AddLast(data.Prototype.normals[triangle.P0]);
-      data.Normals.AddLast(data.Prototype.normals[triangle.P1]);
-      data.Normals.AddLast(data.Prototype.normals[triangle.P2]);
-
-      data.Uvs.AddLast(data.Prototype.uv[triangle.P0]);
-      data.Uvs.AddLast(data.Prototype.uv[triangle.P1]);
-      data.Uvs.AddLast(data.Prototype.uv[triangle.P2]);
-
-      data.Tris.AddLast(new Triangle(data.Verts.Count - 1, data.Verts.Count - 2, data.Verts.Count - 3));
+      data.Tris.AddLast(new Triangle(data.Verts.Count - 3, data.Verts.Count - 2, data.Verts.Count - 1));
    }
 
    private void CutTriangle(Triangle triangle, out List<Vector3> cutEdge)
@@ -142,11 +141,6 @@ public class Cut
       originSide.Verts.AddLast(intersection1);
       originSide.Verts.AddLast(intersection2);
 
-      //adding uv,normals,colors to the origin sub mesh
-      originSide.CopyMeshParams(triangle.P0);
-      originSide.CopyMeshParams(triangle.P0);
-      originSide.CopyMeshParams(triangle.P0);
-            
       //generating a triangle on these vertices
       originSide.Tris.AddLast(new Triangle(
          originSide.Verts.Count - 3, 
@@ -155,32 +149,26 @@ public class Cut
       );
             
       //adding new vertices on one other of the plane
+      alienSide.Verts.AddLast(intersection2);
+      alienSide.Verts.AddLast(intersection1);
       alienSide.Verts.AddLast(p1Val);
       alienSide.Verts.AddLast(p2Val);
-      alienSide.Verts.AddLast(intersection1);
-      alienSide.Verts.AddLast(intersection2);
-
-      //adding uv,normals,colors to the alien sub mesh
-      alienSide.CopyMeshParams(triangle.P1);
-      alienSide.CopyMeshParams(triangle.P2);
-      alienSide.CopyMeshParams(triangle.P2);
-      alienSide.CopyMeshParams(triangle.P2);
 
       //generating triangles on these vertices
       alienSide.Tris.AddLast(new Triangle(
-         alienSide.Verts.Count - 1,
+         alienSide.Verts.Count - 3,
          alienSide.Verts.Count - 2,
-         alienSide.Verts.Count - 3)
+         alienSide.Verts.Count - 4)
       );
       alienSide.Tris.AddLast(new Triangle(
-         alienSide.Verts.Count - 2, 
          alienSide.Verts.Count - 4, 
-         alienSide.Verts.Count - 3)
+         alienSide.Verts.Count - 2, 
+         alienSide.Verts.Count - 1)
       );
 
       //adding intersections as edge points
-      cutEdge.Add(intersection1);
       cutEdge.Add(intersection2);
+      cutEdge.Add(intersection1);
 
       return cutEdge;
    }
@@ -218,36 +206,31 @@ public class Cut
             
       //generating triangles on these vertices
       originSide.Tris.AddLast(new Triangle(
-         originSide.Verts.Count - 4, 
          originSide.Verts.Count - 3, 
-         originSide.Verts.Count - 2)
+         originSide.Verts.Count - 2, 
+         originSide.Verts.Count - 4)
       );
       originSide.Tris.AddLast(new Triangle(
-         originSide.Verts.Count - 2,
          originSide.Verts.Count - 4,
-         originSide.Verts.Count - 3)
+         originSide.Verts.Count - 2,
+         originSide.Verts.Count - 1)
       );
 
       //adding new vertices on one other of the plane
-      alienSide.Verts.AddLast(p2Val);
-      alienSide.Verts.AddLast(intersection1);
       alienSide.Verts.AddLast(intersection2);
+      alienSide.Verts.AddLast(intersection1);
+      alienSide.Verts.AddLast(p2Val);
 
-      //adding uv,normals,colors to the alien sub mesh
-      alienSide.CopyMeshParams(triangle.P2);
-      alienSide.CopyMeshParams(triangle.P2);
-      alienSide.CopyMeshParams(triangle.P2);
-            
       //generating triangles on these vertices
       alienSide.Tris.AddLast(new Triangle(
-         alienSide.Verts.Count - 1, 
+         alienSide.Verts.Count - 3, 
          alienSide.Verts.Count - 2,
-         alienSide.Verts.Count - 3)
+         alienSide.Verts.Count - 1)
       );
 
       //adding intersections as edge points
-      cutEdge.Add(intersection1);
       cutEdge.Add(intersection2);
+      cutEdge.Add(intersection1);
       
       return cutEdge;
    }
@@ -268,8 +251,8 @@ public class Cut
       Vector3 p2World = transform.TransformPoint(p2Val);
       
       //computing plane/tri intersection points
-      Vector3 intersection1 = transform.InverseTransformPoint(PlaneLineIntersection(_cutterPlane, p1World, p2World));
-      Vector3 intersection2 = transform.InverseTransformPoint(PlaneLineIntersection(_cutterPlane, p1World, p0World));
+      Vector3 intersection1 = transform.InverseTransformPoint(PlaneLineIntersection(_cutterPlane, p0World, p1World));
+      Vector3 intersection2 = transform.InverseTransformPoint(PlaneLineIntersection(_cutterPlane, p2World, p1World));
 
       //adding new vertices on one side of the plane
       originSide.Verts.AddLast(p2Val);
@@ -277,34 +260,23 @@ public class Cut
       originSide.Verts.AddLast(intersection1);
       originSide.Verts.AddLast(intersection2);
 
-      //adding uv,normals,colors to the origin sub mesh
-      originSide.CopyMeshParams(triangle.P2);
-      originSide.CopyMeshParams(triangle.P0);
-      originSide.CopyMeshParams(triangle.P0);
-      originSide.CopyMeshParams(triangle.P0);
-      
       //generating triangles on these vertices
       originSide.Tris.AddLast(new Triangle(
-         originSide.Verts.Count - 4,
          originSide.Verts.Count - 3,
-         originSide.Verts.Count - 2)
+         originSide.Verts.Count - 2,
+         originSide.Verts.Count - 4)
       );
       originSide.Tris.AddLast(new Triangle(
-         originSide.Verts.Count - 3,
-         originSide.Verts.Count - 1,
-         originSide.Verts.Count - 2)
+         originSide.Verts.Count - 4,
+         originSide.Verts.Count - 2,
+         originSide.Verts.Count - 1)
       );
 
       //adding new vertices on one other of the plane
-      alienSide.Verts.AddLast(p1Val);
-      alienSide.Verts.AddLast(intersection1);
       alienSide.Verts.AddLast(intersection2);
+      alienSide.Verts.AddLast(intersection1);
+      alienSide.Verts.AddLast(p1Val);
 
-      //adding uv,normals,colors to the alien sub mesh
-      alienSide.CopyMeshParams(triangle.P1);
-      alienSide.CopyMeshParams(triangle.P1);
-      alienSide.CopyMeshParams(triangle.P1);
-      
       //generating triangles on these vertices
       alienSide.Tris.AddLast(new Triangle(
          alienSide.Verts.Count - 3,
@@ -313,8 +285,8 @@ public class Cut
       );
 
       //adding intersections as edge points
-      cutEdge.Add(intersection1);
       cutEdge.Add(intersection2);
+      cutEdge.Add(intersection1);
       
       return cutEdge;
    }

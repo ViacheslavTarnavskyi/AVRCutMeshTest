@@ -7,7 +7,7 @@ public class GameController : MonoBehaviour
 {
    [SerializeField] private GameObject _slicePrefab;
    
-   private List<SlicedObject> _objectsOnScene;
+   private List<SlicedObject> _objectsOnScene = new List<SlicedObject>();
 
    private void OnEnable()
    {
@@ -22,9 +22,14 @@ public class GameController : MonoBehaviour
    private void ImplementCut(Plane cutPlane)
    {
       List<RawMeshData> res = new List<RawMeshData>();
-      foreach (var obj in _objectsOnScene)
+      for(int i = _objectsOnScene.Count-1; i > 0 ; i--)
       {
-         res = MeshSlicer.SliceMesh(cutPlane, obj);
+         res = MeshSlicer.SliceMesh(cutPlane, _objectsOnScene[i]);
+         if (res.Count > 0)
+         {
+            Destroy(_objectsOnScene[i].gameObject);
+            _objectsOnScene.RemoveAt(i);
+         }
          foreach (var slice in res)
          {
             InstantiateSlice(slice);
@@ -36,10 +41,11 @@ public class GameController : MonoBehaviour
    {
       SlicedObject slice = Instantiate(_slicePrefab).GetComponent<SlicedObject>();
       slice.Init(data.MeshTransform,data.ToMesh());
+      _objectsOnScene.Add(slice);
    }
 
    public void SpawnAPrimitive()
    {
-      
+      _objectsOnScene.Add(Instantiate(_slicePrefab).GetComponent<SlicedObject>());
    }
 }

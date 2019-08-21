@@ -28,7 +28,7 @@ public static class MeshSlicer
       
       else
       {
-         DivideVerticesToPosAndNegSubmeshes(cutterPlane,transform ,mesh.vertices, out pos, out neg);
+         DivideVerticesToPosAndNegSubmeshes(mesh,cutterPlane,transform ,mesh.vertices, out pos, out neg);
 
          if (pos.VertsIndexes.Count == 0 || neg.VertsIndexes.Count == 0)
          {
@@ -41,10 +41,10 @@ public static class MeshSlicer
       }
    }
    
-   private static void DivideVerticesToPosAndNegSubmeshes(Plane cutterPlane,Transform meshTransform, Vector3[] verts, out RawMeshData pos, out RawMeshData neg)
+   private static void DivideVerticesToPosAndNegSubmeshes(Mesh mesh, Plane cutterPlane,Transform meshTransform, Vector3[] verts, out RawMeshData pos, out RawMeshData neg)
    {
-      pos = new RawMeshData();
-      neg = new RawMeshData();
+      pos = new RawMeshData(mesh, meshTransform);
+      neg = new RawMeshData(mesh, meshTransform);
       
       for (int i = 0; i < verts.Length; i++)
       {

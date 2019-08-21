@@ -18,6 +18,12 @@ public class RawMeshData
 
     public RawMeshData()
     {
+         Verts = new LinkedList<Vector3>();
+         VertsIndexes = new LinkedList<int>();
+         Tris = new LinkedList<Triangle>();
+         Uvs = new LinkedList<Vector2>();
+         Normals = new LinkedList<Vector3>();
+         Colors = new LinkedList<Color>();
     }
     
     public RawMeshData(Mesh prototype,Transform meshTransform): this()
@@ -28,9 +34,9 @@ public class RawMeshData
 
     public void CopyMeshParams(int index)
     {
-        Normals.AddLast(Prototype.normals[index]);
-        Uvs.AddLast(Prototype.uv[index]);
-        Colors.AddLast(Prototype.colors[index]);
+       // Normals.AddLast(Prototype.normals[index]);
+       // Uvs.AddLast(Prototype.uv[index]);
+      //  Colors.AddLast(Prototype.colors[index]);
     }
 
     public void AddMeshParams(Vector3 normal,Vector2 uv,Color color)
@@ -45,8 +51,9 @@ public class RawMeshData
         Mesh res = new Mesh();
         res.vertices = Verts.ToArray();
         res.triangles = Utils.ToTris(Tris);
-        res.uv = Uvs.ToArray();
-        res.colors = Colors.ToArray();
+        //res.uv = Uvs.ToArray();
+//        res.colors = Colors.ToArray();
+        res.RecalculateNormals();
         return res;
     }
 }
