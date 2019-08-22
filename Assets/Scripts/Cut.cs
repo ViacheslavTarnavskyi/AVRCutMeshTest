@@ -6,13 +6,11 @@ using UnityEngine;
 public class Cut
 {
    private Mesh _originalMesh;
-
    private RawMeshData _posSubMesh;
    private RawMeshData _negSubMesh;
-
    private Plane _cutterPlane;
 
-   public List<RawMeshData> meshes = new List<RawMeshData>();
+   public List<RawMeshData> Meshes { get; private set; } 
    
    /// <summary>
    /// Constructor
@@ -28,6 +26,7 @@ public class Cut
       _negSubMesh = negSubMesh;
       _cutterPlane = cutterPlane;
 
+      Meshes = new List<RawMeshData>();
       CutMesh();
    }
 
@@ -55,51 +54,44 @@ public class Cut
          }
       }
       
-      AddCap(_negSubMesh,cutEdge);
-      AddInvevrsedCap(_posSubMesh,cutEdge);
+      AddCap(_negSubMesh,cutEdge,true);
+      AddCap(_posSubMesh,cutEdge,false);
       
-      meshes.Add(_posSubMesh);
-      meshes.Add(_negSubMesh);
+      Meshes.Add(_posSubMesh);
+      Meshes.Add(_negSubMesh);
    }
 
-   /// <summary>
-   /// Ads a cap for the hull data
-   /// </summary>
-   /// <param name="data"></param>
-   /// <param name="edge"></param>
-   private void AddCap(RawMeshData data,List<Vector3> edge)
+/// <summary>
+/// Ads a cap for the hull data
+/// </summary>
+/// <param name="data"></param>
+/// <param name="edge"></param>
+/// <param name="inverted"></param>
+   private void AddCap(RawMeshData data,List<Vector3> edge, bool inverted)
    {
       Vector3 capCenter = Utils.ComputeCenter(edge);
       edge.Add(capCenter);
       int VertsCount = data.Verts.Count;
       data.Verts.AddRange(edge);
 
-      for (int i = VertsCount; i < data.Verts.Count - 2; i+=2)
+      if (inverted)
       {
-         data.Tris.AddLast(new Triangle(i, i + 1, data.Verts.Count - 1));
+         for (int i = VertsCount; i < data.Verts.Count - 2; i += 2)
+         {
+            data.Tris.AddLast(new Triangle(i, i + 1, data.Verts.Count - 1));
+         }
+      }
+      else
+      {
+         for (int i = VertsCount; i < data.Verts.Count - 2; i += 2)
+         {
+            data.Tris.AddLast(new Triangle(i + 1, i, data.Verts.Count - 1));
+         }
       }
    }
    
    /// <summary>
-   /// Ads inversed cap for  a hull data
-   /// </summary>
-   /// <param name="data"></param>
-   /// <param name="edge"></param>
-   private void AddInvevrsedCap(RawMeshData data,List<Vector3> edge)
-   {
-      Vector3 capCenter = Utils.ComputeCenter(edge);
-      edge.Add(capCenter);
-      int VertsCount = data.Verts.Count;
-      data.Verts.AddRange(edge);
-
-      for (int i = VertsCount; i < data.Verts.Count - 2; i+=2)
-      {
-         data.Tris.AddLast(new Triangle(i+1, i, data.Verts.Count - 1));
-      }
-   }
-   
-   /// <summary>
-   /// Copies data from its prototype by a triangle
+   /// Copies verts from data prototype by a triangle
    /// </summary>
    /// <param name="triangle"></param>
    /// <param name="data"></param>
@@ -153,7 +145,7 @@ public class Cut
    }
 
    /// <summary>
-   /// Triangle Cut logic for triangle (0)(1,2)
+   /// Triangle Cut logic for triangle (0)|(1,2)
    /// </summary>
    /// <param name="triangle"></param>
    /// <param name="originSide"></param>
@@ -161,23 +153,16 @@ public class Cut
    /// <returns></returns>
    private List<Vector3> CreateP0Cut(Triangle triangle, RawMeshData originSide, RawMeshData alienSide)
    {
-      Transform transform = originSide.MeshTransform;
+      List<Vector3> cutEdge = new List<Vector3>();
       
       //getting verts values by triangle
       Vector3 p0Val = _originalMesh.vertices[triangle.P0];
       Vector3 p1Val = _originalMesh.vertices[triangle.P1];
       Vector3 p2Val = _originalMesh.vertices[triangle.P2];
       
-      List<Vector3> cutEdge = new List<Vector3>();
-
-      //computing verts world position;
-      Vector3 p0World = transform.TransformPoint(p0Val);
-      Vector3 p1World = transform.TransformPoint(p1Val);
-      Vector3 p2World = transform.TransformPoint(p2Val);
-      
       //computing plane/tri intersection points
-      Vector3 intersection1 = transform.InverseTransformPoint(PlaneLineIntersection(_cutterPlane, p0World, p1World));
-      Vector3 intersection2 = transform.InverseTransformPoint(PlaneLineIntersection(_cutterPlane, p0World, p2World));
+      Vector3 intersection1 = GetLocalIntersectionPoint(_cutterPlane, p0Val, p1Val,originSide);
+      Vector3 intersection2 = GetLocalIntersectionPoint(_cutterPlane, p0Val, p2Val,originSide);
 
       //adding new vertices on one side of the plane
       originSide.Verts.AddLast(p0Val);
@@ -209,7 +194,7 @@ public class Cut
          alienSide.Verts.Count - 1)
       );
 
-      //adding intersections as edge points dependent on origin side
+      //adding intersections as edge points order dependent on origin side relatively to a plane
       if (originSide.Equals(_posSubMesh))
       {
          cutEdge.Add(intersection1);
@@ -225,7 +210,7 @@ public class Cut
    }
 
    /// <summary>
-   /// Triangle Cut logic for triangle (0,1)(2)
+   /// Triangle Cut logic for triangle (0,1)|(2)
    /// </summary>
    /// <param name="triangle"></param>
    /// <param name="originSide"></param>
@@ -233,22 +218,16 @@ public class Cut
    /// <returns></returns>
    private List<Vector3> CreateP01Cut(Triangle triangle, RawMeshData originSide, RawMeshData alienSide)
    {
-      Transform transform = originSide.MeshTransform;
       List<Vector3> cutEdge = new List<Vector3>();
            
       //getting verts values by triangle
       Vector3 p0Val = _originalMesh.vertices[triangle.P0];
       Vector3 p1Val = _originalMesh.vertices[triangle.P1];
       Vector3 p2Val = _originalMesh.vertices[triangle.P2];
-      
-      //computing verts world position;
-      Vector3 p0World = transform.TransformPoint(p0Val);
-      Vector3 p1World = transform.TransformPoint(p1Val);
-      Vector3 p2World = transform.TransformPoint(p2Val);
-      
+
       //computing plane/tri intersection points
-      Vector3 intersection1 = transform.InverseTransformPoint(PlaneLineIntersection(_cutterPlane, p0World, p2World));
-      Vector3 intersection2 = transform.InverseTransformPoint(PlaneLineIntersection(_cutterPlane, p1World, p2World));
+      Vector3 intersection1 = GetLocalIntersectionPoint(_cutterPlane, p0Val, p2Val,originSide);
+      Vector3 intersection2 = GetLocalIntersectionPoint(_cutterPlane, p1Val, p2Val,originSide);
 
       //adding new vertices on one side of the plane
       originSide.Verts.AddLast(p0Val);
@@ -280,7 +259,8 @@ public class Cut
          alienSide.Verts.Count - 1)
       );
 
-      //adding intersections as edge points dependent on origin side
+      //adding intersections as edge points order dependent on origin side relatively to a plane
+
       if (originSide.Equals(_posSubMesh))
       {
          cutEdge.Add(intersection2);
@@ -295,7 +275,7 @@ public class Cut
    }
 
    /// <summary>
-   /// Triangle Cut logic for triangle (2,0)(1) 
+   /// Triangle Cut logic for triangle (2,0)|(1) 
    /// </summary>
    /// <param name="triangle"></param>
    /// <param name="originSide"></param>
@@ -303,7 +283,6 @@ public class Cut
    /// <returns></returns>
    private List<Vector3> CreateP20Cut(Triangle triangle, RawMeshData originSide, RawMeshData alienSide)
    {
-      Transform transform = originSide.MeshTransform;
       List<Vector3> cutEdge = new List<Vector3>();
            
       //getting verts values by triangle
@@ -311,15 +290,10 @@ public class Cut
       Vector3 p1Val = _originalMesh.vertices[triangle.P1];
       Vector3 p2Val = _originalMesh.vertices[triangle.P2];
       
-      //computing verts world position;
-      Vector3 p0World = transform.TransformPoint(p0Val);
-      Vector3 p1World = transform.TransformPoint(p1Val);
-      Vector3 p2World = transform.TransformPoint(p2Val);
-      
       //computing plane/tri intersection points
-      Vector3 intersection1 = transform.InverseTransformPoint(PlaneLineIntersection(_cutterPlane, p0World, p1World));
-      Vector3 intersection2 = transform.InverseTransformPoint(PlaneLineIntersection(_cutterPlane, p2World, p1World));
-
+      Vector3 intersection1 = GetLocalIntersectionPoint(_cutterPlane, p0Val, p1Val, originSide);
+      Vector3 intersection2 = GetLocalIntersectionPoint(_cutterPlane, p2Val, p1Val, originSide);
+      
       //adding new vertices on one side of the plane
       originSide.Verts.AddLast(p2Val);
       originSide.Verts.AddLast(p0Val);
@@ -350,7 +324,7 @@ public class Cut
          alienSide.Verts.Count - 1)
       );
 
-      //adding intersections as edge points dependent on origin side
+      //adding intersections as edge points order dependent on origin side relatively to a plane
       if (originSide.Equals(_posSubMesh))
       {
          cutEdge.Add(intersection1);
@@ -362,5 +336,22 @@ public class Cut
          cutEdge.Add(intersection1);
       }
       return cutEdge;
+   }
+
+   /// <summary>
+   /// Computes intersection point vor 2 verts and a plane in mesh local space 
+   /// </summary>
+   /// <param name="plane"></param>
+   /// <param name="p1"></param>
+   /// <param name="p2"></param>
+   /// <param name="mesh"></param>
+   /// <returns></returns>
+   private Vector3 GetLocalIntersectionPoint(Plane plane, Vector3 p1, Vector3 p2, RawMeshData mesh)
+   {
+      //computing verts world position;
+      Vector3 p0World = mesh.MeshTransform.TransformPoint(p1);
+      Vector3 p1World = mesh.MeshTransform.TransformPoint(p2);
+      
+      return mesh.MeshTransform.InverseTransformPoint(PlaneLineIntersection(_cutterPlane, p0World, p1World));
    }
 }

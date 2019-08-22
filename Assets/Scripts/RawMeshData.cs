@@ -14,8 +14,6 @@ public class RawMeshData
     public Mesh Prototype { get; private set; }
     public Transform MeshTransform { get; private set; }
 
-    public Vector3 GetWorldCenterPoint => MeshTransform.TransformPoint(Utils.ComputeCenter(Verts.ToList()));
-
     public RawMeshData()
     {
          Verts = new LinkedList<Vector3>();

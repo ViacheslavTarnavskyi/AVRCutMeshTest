@@ -19,7 +19,7 @@ public static class MeshSlicer
 
       Cut cut = new Cut(obj.Filter.mesh, positive, negative, cutterPlane);
       
-      return cut.meshes;
+      return cut.Meshes;
    }
 
    /// <summary>
